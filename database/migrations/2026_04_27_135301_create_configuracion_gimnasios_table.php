@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notas', function (Blueprint $table) {
+        Schema::create('configuracion_gimnasio', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->integer('nota');
+            $table->foreignId('gimnasio_id')->constrained('gimnasios');
+            $table->integer('duracion_slot');
+            $table->time('hora_apertura');
+            $table->time('hora_cierre');
         });
     }
 
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notas');
+        Schema::dropIfExists('configuracion_gimnasio');
     }
 };
