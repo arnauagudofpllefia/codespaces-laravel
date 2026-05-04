@@ -3,63 +3,85 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reserva;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ReservasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        //
+        $reservas = Reserva::query()
+            ->with(['usuario', 'maquina', 'gimnasio'])
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($reservas);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+    public function create(): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+    public function store(Request $request): JsonResponse
     {
-        //
+        $reserva = Reserva::create($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Reserva creada correctamente.',
+            'data' => $reserva->load(['usuario', 'maquina', 'gimnasio']),
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Reserva $reserva)
+
+    public function show(Reserva $reserva): JsonResponse
     {
-        //
+        return response()->json($reserva->load(['usuario', 'maquina', 'gimnasio']));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Reserva $reserva)
+
+    public function edit(Reserva $reserva): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Reserva $reserva)
+
+    public function update(Request $request, Reserva $reserva): JsonResponse
     {
-        //
+        $reserva->update($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Reserva actualizada correctamente.',
+            'data' => $reserva->fresh()->load(['usuario', 'maquina', 'gimnasio']),
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Reserva $reserva)
+    
+    public function destroy(Reserva $reserva): JsonResponse
     {
-        //
+        $reserva->delete();
+
+        return response()->json([
+            'message' => 'Reserva eliminada correctamente.',
+        ]);
+    }
+
+    private function validatedData(Request $request): array
+    {
+        return $request->validate([
+            'usuario_id' => ['required', 'integer', 'exists:usuarios,id'],
+            'maquina_id' => ['required', 'integer', 'exists:maquinas,id'],
+            'gimnasio_id' => ['required', 'integer', 'exists:gimnasios,id'],
+            'hora_inicio' => ['required', 'date'],
+            'hora_fin' => ['required', 'date', 'after:hora_inicio'],
+            'estado' => ['sometimes', 'string', 'in:activa,cancelada,completada'],
+        ]);
     }
 }
