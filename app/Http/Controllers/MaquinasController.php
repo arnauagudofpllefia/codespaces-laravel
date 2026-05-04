@@ -3,63 +3,83 @@
 namespace App\Http\Controllers;
 
 use App\Models\Maquina;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MaquinasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        //
+        $maquinas = Maquina::query()
+            ->with('gimnasio')
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($maquinas);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+    public function create(): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+    public function store(Request $request): JsonResponse
     {
-        //
+        $maquina = Maquina::create($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Maquina creada correctamente.',
+            'data' => $maquina->load('gimnasio'),
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Maquina $maquina)
+
+    public function show(Maquina $maquina): JsonResponse
     {
-        //
+        return response()->json($maquina->load('gimnasio'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Maquina $maquina)
+
+    public function edit(Maquina $maquina): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Maquina $maquina)
+
+    public function update(Request $request, Maquina $maquina): JsonResponse
     {
-        //
+        $maquina->update($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Maquina actualizada correctamente.',
+            'data' => $maquina->fresh()->load('gimnasio'),
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Maquina $maquina)
+    
+    public function destroy(Maquina $maquina): JsonResponse
     {
-        //
+        $maquina->delete();
+
+        return response()->json([
+            'message' => 'Maquina eliminada correctamente.',
+        ]);
+    }
+
+    private function validatedData(Request $request): array
+    {
+        return $request->validate([
+            'gimnasio_id' => ['required', 'integer', 'exists:gimnasios,id'],
+            'nombre' => ['required', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string'],
+            'activa' => ['sometimes', 'boolean'],
+        ]);
     }
 }

@@ -3,63 +3,79 @@
 namespace App\Http\Controllers;
 
 use App\Models\Gimnasio;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GimnasiosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        //
+        $gimnasios = Gimnasio::query()->orderBy('id')->get();
+
+        return response()->json($gimnasios);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+    public function create(): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+    public function store(Request $request): JsonResponse
     {
-        //
+        $gimnasio = Gimnasio::create($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Gimnasio creado correctamente.',
+            'data' => $gimnasio,
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Gimnasio $gimnasio)
+
+    public function show(Gimnasio $gimnasio): JsonResponse
     {
-        //
+        return response()->json($gimnasio);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Gimnasio $gimnasio)
+
+    public function edit(Gimnasio $gimnasio): JsonResponse
     {
-        //
+        return response()->json([
+            'message' => 'Este endpoint no está disponible en la API.',
+        ], 405);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Gimnasio $gimnasio)
+
+    public function update(Request $request, Gimnasio $gimnasio): JsonResponse
     {
-        //
+        $gimnasio->update($this->validatedData($request));
+
+        return response()->json([
+            'message' => 'Gimnasio actualizado correctamente.',
+            'data' => $gimnasio->fresh(),
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Gimnasio $gimnasio)
+    
+    public function destroy(Gimnasio $gimnasio): JsonResponse
     {
-        //
+        $gimnasio->delete();
+
+        return response()->json([
+            'message' => 'Gimnasio eliminado correctamente.',
+        ]);
+    }
+
+    private function validatedData(Request $request): array
+    {
+        return $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'telefono' => ['required', 'string', 'max:30'],
+        ]);
     }
 }
