@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Usuario;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Auth;
 
 
 class AuthController extends Controller
@@ -55,7 +54,10 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $credentials = $request->only('email', 'contrasena');
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->contrasena,
+        ];
 
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
