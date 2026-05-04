@@ -2,18 +2,44 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsuariosController;
+use App\Http\Controllers\MaquinasController;
+use App\Http\Controllers\ReservasController;
+use App\Http\Controllers\AdminController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Rutas públicas
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/students', [StudentController::class, 'index']);
+// Rutas protegidas con autenticación
+Route::middleware('auth:api')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json($request->user());
+    });
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::post('/students', function () { return 'Creating student'; });
+    // Máquinas - lectura para usuarios normales
+    Route::get('/machines', [MaquinasController::class, 'index']);
+    Route::get('/machines/{maquina}', [MaquinasController::class, 'show']);
+    Route::get('/machines/{maquina}/slots', [MaquinasController::class, 'getSlots']);
 
-Route::put('/students/{id}', function () { return 'Updating student'; });
+    // Reservas - para usuarios normales
+    Route::post('/reservations', [ReservasController::class, 'store']);
+    Route::get('/reservations/my', [ReservasController::class, 'getMyReservations']);
+    Route::delete('/reservations/{reserva}', [ReservasController::class, 'destroy']);
 
-Route::delete('/students/{id}', function () { return 'Deleti student'; });
+    // Rutas de administrador
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
 
-Route::get('/students/{id}', function () {return 'Getting one student'; });
+        Route::apiResource('machines', MaquinasController::class);
+        Route::get('/gym', [AdminController::class, 'getGym']);
+        Route::put('/gym', [AdminController::class, 'updateGym']);
+
+        Route::get('/users', [AdminController::class, 'getUsers']);
+        Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+
+        Route::get('/reservations', [AdminController::class, 'getReservations']);
+    });
+});

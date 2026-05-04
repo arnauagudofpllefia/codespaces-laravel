@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Reserva;
+
+class AdminController extends Controller
+{
+    public function dashboard(): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Dashboard del administrador.',
+        ]);
+    }
+
+    public function getGym(): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Configuración del gimnasio.',
+        ]);
+    }
+
+    public function updateGym(Request $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Configuración del gimnasio actualizada.',
+        ]);
+    }
+
+    public function getUsers(): JsonResponse
+    {
+        $usuarios = Usuario::query()->orderBy('id')->get();
+        return response()->json($usuarios);
+    }
+
+    public function updateUserRole(Request $request, $id): JsonResponse
+    {
+        $usuario = Usuario::findOrFail($id);
+
+        $data = $request->validate([
+            'rol' => ['required', 'string', 'in:admin,usuario'],
+        ]);
+
+        $usuario->update($data);
+
+        return response()->json([
+            'message' => 'Rol del usuario actualizado.',
+            'data' => $usuario,
+        ]);
+    }
+
+    public function getReservations(): JsonResponse
+    {
+        $reservas = Reserva::query()
+            ->with(['usuario', 'maquina', 'gimnasio'])
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($reservas);
+    }
+}

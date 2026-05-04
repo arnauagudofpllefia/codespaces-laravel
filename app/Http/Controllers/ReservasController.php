@@ -63,7 +63,7 @@ class ReservasController extends Controller
         ]);
     }
 
-    
+
     public function destroy(Reserva $reserva): JsonResponse
     {
         $reserva->delete();
@@ -71,6 +71,17 @@ class ReservasController extends Controller
         return response()->json([
             'message' => 'Reserva eliminada correctamente.',
         ]);
+    }
+
+    public function getMyReservations(Request $request): JsonResponse
+    {
+        $reservas = Reserva::query()
+            ->where('usuario_id', $request->user()->id)
+            ->with(['maquina', 'gimnasio'])
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($reservas);
     }
 
     private function validatedData(Request $request): array

@@ -63,13 +63,22 @@ class MaquinasController extends Controller
         ]);
     }
 
-    
+
     public function destroy(Maquina $maquina): JsonResponse
     {
         $maquina->delete();
 
         return response()->json([
             'message' => 'Maquina eliminada correctamente.',
+        ]);
+    }
+
+    public function getSlots(Maquina $maquina): JsonResponse
+    {
+        
+        return response()->json([
+            'maquina_id' => $maquina->id,
+            'slots' => [],
         ]);
     }
 
