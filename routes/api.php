@@ -9,6 +9,9 @@ use App\Http\Controllers\ReservasController;
 use App\Http\Controllers\AdminController;
 
 // Rutas públicas
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/users', [AdminController::class, 'getUsers']);
