@@ -14,7 +14,7 @@ Route::get('/health', function () {
 });
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/users', [AdminController::class, 'getUsers']);
+
 
 // Rutas protegidas con autenticación
 Route::middleware('auth:api')->group(function () {
@@ -41,7 +41,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/gym', [AdminController::class, 'getGym']);
         Route::put('/gym', [AdminController::class, 'updateGym']);
 
-
+        Route::get('/users', [AdminController::class, 'getUsers']);
         Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
 
         Route::get('/reservations', [AdminController::class, 'getReservations']);
