@@ -38,6 +38,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
 
         Route::apiResource('machines', MaquinasController::class);
+        Route::post('/gym', [AdminController::class, 'createGym']);
         Route::get('/gym', [AdminController::class, 'getGym']);
         Route::put('/gym', [AdminController::class, 'updateGym']);
 

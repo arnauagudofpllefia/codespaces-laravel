@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Gimnasio;
 use App\Models\Usuario;
 use App\Models\Reserva;
 
@@ -14,6 +15,20 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'Dashboard del administrador.',
         ]);
+    }
+
+    public function createGym(Request $request): JsonResponse
+    {
+        $gimnasio = Gimnasio::create($request->validate([
+            'nombre'    => ['required', 'string', 'max:255'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'telefono'  => ['required', 'string', 'max:20'],
+        ]));
+
+        return response()->json([
+            'message' => 'Gimnasio creado correctamente.',
+            'data'    => $gimnasio,
+        ], 201);
     }
 
     public function getGym(): JsonResponse
