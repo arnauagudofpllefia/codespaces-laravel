@@ -30,7 +30,24 @@ class ReservasController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $reserva = Reserva::create($this->validatedData($request));
+        $datos = $this->validatedData($request);
+
+        $hayConflicto = Reserva::query()
+            ->where('maquina_id', $datos['maquina_id'])
+            ->where('estado', 'activa')
+            ->where(function ($q) use ($datos) {
+                $q->where('hora_inicio', '<', $datos['hora_fin'])
+                    ->where('hora_fin', '>', $datos['hora_inicio']);
+            })
+            ->exists();
+
+        if ($hayConflicto) {
+            return response()->json([
+                'message' => 'La máquina ya tiene una reserva activa en ese tramo horario.',
+            ], 422);
+        }
+
+        $reserva = Reserva::create($datos);
 
         return response()->json([
             'message' => 'Reserva creada correctamente.',
@@ -55,7 +72,25 @@ class ReservasController extends Controller
 
     public function update(Request $request, Reserva $reserva): JsonResponse
     {
-        $reserva->update($this->validatedData($request));
+        $datos = $this->validatedData($request);
+
+        $hayConflicto = Reserva::query()
+            ->where('maquina_id', $datos['maquina_id'])
+            ->where('estado', 'activa')
+            ->where('id', '!=', $reserva->id)
+            ->where(function ($q) use ($datos) {
+                $q->where('hora_inicio', '<', $datos['hora_fin'])
+                    ->where('hora_fin', '>', $datos['hora_inicio']);
+            })
+            ->exists();
+
+        if ($hayConflicto) {
+            return response()->json([
+                'message' => 'La máquina ya tiene una reserva activa en ese tramo horario.',
+            ], 422);
+        }
+
+        $reserva->update($datos);
 
         return response()->json([
             'message' => 'Reserva actualizada correctamente.',
