@@ -42,9 +42,13 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/gym', [AdminController::class, 'getGym']);
         Route::put('/gym', [AdminController::class, 'updateGym']);
 
-        Route::get('/users', [AdminController::class, 'getUsers']);
+        // CRUD de usuarios para admin
+        Route::apiResource('users', UsuariosController::class)
+            ->parameters(['users' => 'usuario']);
         Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
 
-        Route::get('/reservations', [AdminController::class, 'getReservations']);
+        // CRUD de reservas para admin
+        Route::apiResource('reservations', ReservasController::class)
+            ->parameters(['reservations' => 'reserva']);
     });
 });
