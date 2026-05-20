@@ -7,6 +7,7 @@ use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\MaquinasController;
 use App\Http\Controllers\ReservasController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GimnasiosController;
 
 // Rutas públicas
 Route::get('/health', function () {
@@ -22,6 +23,10 @@ Route::middleware('auth:api')->group(function () {
         return response()->json($request->user());
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Gimnasios - lectura para usuarios autenticados
+    Route::get('/gyms', [GimnasiosController::class, 'index']);
+    Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
 
     // Máquinas - lectura para usuarios normales
     Route::get('/machines', [MaquinasController::class, 'index']);
