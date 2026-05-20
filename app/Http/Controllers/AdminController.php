@@ -33,8 +33,31 @@ class AdminController extends Controller
 
     public function getGym(): JsonResponse
     {
+        $gimnasios = Gimnasio::query()->orderBy('id')->get();
+
         return response()->json([
-            'message' => 'Configuración del gimnasio.',
+            'message' => 'Listado de gimnasios.',
+            'data' => $gimnasios,
+        ]);
+    }
+
+    public function showGym(int $id): JsonResponse
+    {
+        $gimnasio = Gimnasio::query()->findOrFail($id);
+
+        return response()->json([
+            'message' => 'Gimnasio encontrado.',
+            'data' => $gimnasio,
+        ]);
+    }
+
+    public function destroyGym(int $id): JsonResponse
+    {
+        $gimnasio = Gimnasio::query()->findOrFail($id);
+        $gimnasio->delete();
+
+        return response()->json([
+            'message' => 'Gimnasio eliminado correctamente.',
         ]);
     }
 

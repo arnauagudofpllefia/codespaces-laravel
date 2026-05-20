@@ -40,6 +40,8 @@ Route::middleware('auth:api')->group(function () {
         Route::apiResource('machines', MaquinasController::class);
         Route::post('/gym', [AdminController::class, 'createGym']);
         Route::get('/gym', [AdminController::class, 'getGym']);
+        Route::get('/gym/{id}', [AdminController::class, 'showGym']);
+        Route::delete('/gym/{id}', [AdminController::class, 'destroyGym']);
         Route::put('/gym', [AdminController::class, 'updateGym']);
 
         // CRUD de usuarios para admin
