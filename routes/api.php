@@ -15,7 +15,8 @@ Route::get('/health', function () {
 });
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::get('/gyms', [GimnasiosController::class, 'index']);
+Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
 
 // Rutas protegidas con autenticación
 Route::middleware('auth:api')->group(function () {
@@ -25,8 +26,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Gimnasios - lectura para usuarios autenticados
-    Route::get('/gyms', [GimnasiosController::class, 'index']);
-    Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
+
 
     // Máquinas - lectura para usuarios normales
     Route::get('/machines', [MaquinasController::class, 'index']);
