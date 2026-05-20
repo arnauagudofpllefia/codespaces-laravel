@@ -42,7 +42,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/gym', [AdminController::class, 'getGym']);
         Route::get('/gym/{id}', [AdminController::class, 'showGym']);
         Route::delete('/gym/{id}', [AdminController::class, 'destroyGym']);
-        Route::put('/gym', [AdminController::class, 'updateGym']);
+        Route::put('/gym/{id}', [AdminController::class, 'updateGym']);
 
         // CRUD de usuarios para admin
         Route::apiResource('users', UsuariosController::class)

@@ -61,10 +61,21 @@ class AdminController extends Controller
         ]);
     }
 
-    public function updateGym(Request $request): JsonResponse
+    public function updateGym(Request $request, int $id): JsonResponse
     {
+        $gimnasio = Gimnasio::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'nombre'    => ['required', 'string', 'max:255'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'telefono'  => ['required', 'string', 'max:20'],
+        ]);
+
+        $gimnasio->update($data);
+
         return response()->json([
-            'message' => 'Configuración del gimnasio actualizada.',
+            'message' => 'Gimnasio actualizado correctamente.',
+            'data' => $gimnasio->fresh(),
         ]);
     }
 
