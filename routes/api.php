@@ -27,6 +27,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/machines', [MaquinasController::class, 'index']);
     Route::get('/machines/{maquina}', [MaquinasController::class, 'show']);
     Route::get('/machines/{maquina}/slots', [MaquinasController::class, 'getSlots']);
+    Route::get('/machines/{id}/reservations', [ReservasController::class, 'getMachineReservations']);
 
     // Reservas - para usuarios normales
     Route::post('/reservations', [ReservasController::class, 'store']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Maquina;
 use App\Models\Reserva;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -117,6 +118,27 @@ class ReservasController extends Controller
             ->get();
 
         return response()->json($reservas);
+    }
+
+    public function getMachineReservations(int $id): JsonResponse
+    {
+        Maquina::query()->findOrFail($id);
+
+        $reservas = Reserva::query()
+            ->where('maquina_id', $id)
+            ->orderBy('hora_inicio')
+            ->get(['hora_inicio', 'estado'])
+            ->map(fn (Reserva $reserva) => [
+                'hora' => optional($reserva->hora_inicio)->toIso8601String(),
+                'estado' => $reserva->estado,
+                'plazas' => 1,
+            ])
+            ->values();
+
+        return response()->json([
+            'maquina_id' => $id,
+            'reservas' => $reservas,
+        ]);
     }
 
     private function validatedData(Request $request): array
