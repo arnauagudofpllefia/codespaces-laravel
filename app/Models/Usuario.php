@@ -20,6 +20,7 @@ class Usuario extends Authenticatable implements JWTSubject
         'email',
         'contrasena',
         'rol',
+        'gimnasio_id',
     ];
 
     protected $hidden = [
@@ -39,5 +40,10 @@ class Usuario extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    public function gimnasio()
+    {
+        return $this->belongsTo(Gimnasio::class);
     }
 }

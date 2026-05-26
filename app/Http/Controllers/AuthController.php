@@ -17,6 +17,7 @@ class AuthController extends Controller
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:usuarios,email',
             'contrasena' => 'required|string|min:6',
+            'gimnasio_id' => 'nullable|integer|exists:gimnasios,id',
         ]);
 
         if ($validator->fails()) {
@@ -29,6 +30,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'contrasena' => \Illuminate\Support\Facades\Hash::make($request->contrasena),
                 'rol' => 'usuario',
+                'gimnasio_id' => $request->gimnasio_id,
             ]);
 
             $token = JWTAuth::fromUser($usuario);
@@ -36,7 +38,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Usuario registrado correctamente.',
                 'token' => $token,
-                'user' => $usuario,
+                'user' => $usuario->load('gimnasio'),
             ], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error registrando usuario.'], 500);

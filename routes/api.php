@@ -21,8 +21,9 @@ Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
 // Rutas protegidas con autenticación
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
+        return response()->json($request->user()->load('gimnasio'));
     });
+    Route::patch('/user', [UsuariosController::class, 'updateAuthenticatedUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Gimnasios - lectura para usuarios autenticados
@@ -54,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
         Route::apiResource('users', UsuariosController::class)
             ->parameters(['users' => 'usuario']);
         Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+        Route::patch('/users/{id}/gym', [AdminController::class, 'updateUserGym']);
 
         // CRUD de reservas para admin
         Route::apiResource('reservations', ReservasController::class)

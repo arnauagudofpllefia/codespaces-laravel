@@ -81,7 +81,7 @@ class AdminController extends Controller
 
     public function getUsers(): JsonResponse
     {
-        $usuarios = Usuario::query()->orderBy('id')->get();
+        $usuarios = Usuario::query()->with('gimnasio')->orderBy('id')->get();
         return response()->json($usuarios);
     }
 
@@ -97,7 +97,23 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Rol del usuario actualizado.',
-            'data' => $usuario,
+            'data' => $usuario->fresh()->load('gimnasio'),
+        ]);
+    }
+
+    public function updateUserGym(Request $request, int $id): JsonResponse
+    {
+        $usuario = Usuario::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'gimnasio_id' => ['nullable', 'integer', 'exists:gimnasios,id'],
+        ]);
+
+        $usuario->update($data);
+
+        return response()->json([
+            'message' => 'Gimnasio del usuario actualizado.',
+            'data' => $usuario->fresh()->load('gimnasio'),
         ]);
     }
 

@@ -19,4 +19,9 @@ class Gimnasio extends Model
         'direccion',
         'telefono',
     ];
+
+    public function usuarios()
+    {
+        return $this->hasMany(Usuario::class);
+    }
 }

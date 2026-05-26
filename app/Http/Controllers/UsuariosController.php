@@ -11,7 +11,10 @@ class UsuariosController extends Controller
 {
     public function index(): JsonResponse
     {
-        $usuarios = Usuario::query()->orderBy('id')->get();
+        $usuarios = Usuario::query()
+            ->with('gimnasio')
+            ->orderBy('id')
+            ->get();
 
         return response()->json($usuarios);
     }
@@ -31,13 +34,13 @@ class UsuariosController extends Controller
 
         return response()->json([
             'message' => 'Usuario creado correctamente.',
-            'data' => $usuario,
+            'data' => $usuario->load('gimnasio'),
         ], 201);
     }
 
     public function show(Usuario $usuario): JsonResponse
     {
-        return response()->json($usuario);
+        return response()->json($usuario->load('gimnasio'));
     }
 
     public function edit(Usuario $usuario): JsonResponse
@@ -59,7 +62,7 @@ class UsuariosController extends Controller
 
         return response()->json([
             'message' => 'Usuario actualizado correctamente.',
-            'data' => $usuario->fresh(),
+            'data' => $usuario->fresh()->load('gimnasio'),
         ]);
     }
 
@@ -72,6 +75,25 @@ class UsuariosController extends Controller
         ]);
     }
 
+    public function updateAuthenticatedUser(Request $request): JsonResponse
+    {
+        /** @var Usuario $usuario */
+        $usuario = $request->user();
+
+        $data = $this->validatedDataSelfUpdate($request, $usuario);
+
+        if (isset($data['contrasena'])) {
+            $data['contrasena'] = Hash::make($data['contrasena']);
+        }
+
+        $usuario->update($data);
+
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente.',
+            'data' => $usuario->fresh()->load('gimnasio'),
+        ]);
+    }
+
     private function validatedData(Request $request): array
     {
         return $request->validate([
@@ -79,6 +101,7 @@ class UsuariosController extends Controller
             'email' => ['required', 'email', 'unique:usuarios,email'],
             'contrasena' => ['required', 'string', 'min:6'],
             'rol' => ['sometimes', 'string', 'in:admin,usuario'],
+            'gimnasio_id' => ['sometimes', 'nullable', 'integer', 'exists:gimnasios,id'],
         ]);
     }
 
@@ -89,6 +112,17 @@ class UsuariosController extends Controller
             'email' => ['sometimes', 'email', 'unique:usuarios,email,' . $usuario->id],
             'contrasena' => ['sometimes', 'string', 'min:6'],
             'rol' => ['sometimes', 'string', 'in:admin,usuario'],
+            'gimnasio_id' => ['sometimes', 'nullable', 'integer', 'exists:gimnasios,id'],
+        ]);
+    }
+
+    private function validatedDataSelfUpdate(Request $request, Usuario $usuario): array
+    {
+        return $request->validate([
+            'nombre' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'unique:usuarios,email,' . $usuario->id],
+            'contrasena' => ['sometimes', 'string', 'min:6'],
+            'gimnasio_id' => ['sometimes', 'nullable', 'integer', 'exists:gimnasios,id'],
         ]);
     }
 }
