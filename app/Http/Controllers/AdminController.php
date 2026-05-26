@@ -109,6 +109,10 @@ class AdminController extends Controller
             'gimnasio_id' => ['nullable', 'integer', 'exists:gimnasios,id'],
         ]);
 
+        if ((int) $usuario->gimnasio_id !== (int) $data['gimnasio_id']) {
+            $data['gimnasio_cambiado_en'] = now();
+        }
+
         $usuario->update($data);
 
         return response()->json([

@@ -31,6 +31,7 @@ class AuthController extends Controller
                 'contrasena' => \Illuminate\Support\Facades\Hash::make($request->contrasena),
                 'rol' => 'usuario',
                 'gimnasio_id' => $request->gimnasio_id,
+                'gimnasio_cambiado_en' => $request->gimnasio_id ? now() : null,
             ]);
 
             $token = JWTAuth::fromUser($usuario);

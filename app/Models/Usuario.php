@@ -21,6 +21,11 @@ class Usuario extends Authenticatable implements JWTSubject
         'contrasena',
         'rol',
         'gimnasio_id',
+        'gimnasio_cambiado_en',
+    ];
+
+    protected $casts = [
+        'gimnasio_cambiado_en' => 'datetime',
     ];
 
     protected $hidden = [
