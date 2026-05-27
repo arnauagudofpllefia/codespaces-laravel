@@ -66,6 +66,43 @@ class MaquinaImageUploadTest extends TestCase
         ]);
     }
 
+    public function test_admin_puede_crear_una_maquina_con_archivo_en_campo_archivo(): void
+    {
+        Storage::fake('public');
+        $admin = $this->createAdmin();
+        $token = JWTAuth::fromUser($admin);
+        $gimnasio = Gimnasio::create([
+            'nombre' => 'Gym Archivo',
+            'direccion' => 'Calle Archivo 9',
+            'telefono' => '600000000',
+        ]);
+
+        $response = $this
+            ->withHeader('Authorization', 'Bearer ' . $token)
+            ->post('/api/admin/machines', [
+                'gimnasio_id' => $gimnasio->id,
+                'nombre' => 'Remo 2',
+                'descripcion' => 'Con resistencia magnetica',
+                'imagen_url' => '',
+                'archivo' => UploadedFile::fake()->image('remo.png', 640, 480),
+                'activa' => true,
+            ]);
+
+        $response->assertCreated();
+
+        $imagenPath = $response->json('data.imagen');
+        $this->assertIsString($imagenPath);
+        $this->assertStringStartsWith('machines/', $imagenPath);
+
+        Storage::disk('public')->assertExists($imagenPath);
+
+        $this->assertDatabaseHas('maquinas', [
+            'gimnasio_id' => $gimnasio->id,
+            'nombre' => 'Remo 2',
+            'imagen' => $imagenPath,
+        ]);
+    }
+
     private function createAdmin(): Usuario
     {
         return Usuario::create([
