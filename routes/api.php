@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\MachineController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\MaquinasController;
@@ -45,7 +46,11 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
 
-        Route::apiResource('machines', MaquinasController::class);
+        Route::get('/machines', [MachineController::class, 'index']);
+        Route::post('/machines', [MachineController::class, 'store']);
+        Route::put('/machines/{maquina}', [MachineController::class, 'update']);
+        Route::post('/machines/{maquina}', [MachineController::class, 'update']);
+        Route::delete('/machines/{maquina}', [MachineController::class, 'destroy']);
         Route::post('/uploads', [FilesController::class, 'store']);
         Route::post('/gym', [AdminController::class, 'createGym']);
         Route::get('/gym', [AdminController::class, 'getGym']);
