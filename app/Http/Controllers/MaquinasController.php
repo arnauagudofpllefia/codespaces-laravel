@@ -75,7 +75,7 @@ class MaquinasController extends Controller
 
     public function getSlots(Maquina $maquina): JsonResponse
     {
-        
+
         return response()->json([
             'maquina_id' => $maquina->id,
             'slots' => [],
@@ -88,6 +88,7 @@ class MaquinasController extends Controller
             'gimnasio_id' => ['required', 'integer', 'exists:gimnasios,id'],
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
+            'imagen' => ['sometimes', 'nullable', 'string', 'max:2048'],
             'activa' => ['sometimes', 'boolean'],
         ]);
     }

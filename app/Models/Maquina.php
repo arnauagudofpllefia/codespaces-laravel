@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Maquina extends Model
 {
@@ -18,7 +19,12 @@ class Maquina extends Model
         'gimnasio_id',
         'nombre',
         'descripcion',
+        'imagen',
         'activa',
+    ];
+
+    protected $appends = [
+        'imagen_url',
     ];
 
     protected $casts = [
@@ -33,5 +39,14 @@ class Maquina extends Model
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    public function getImagenUrlAttribute(): ?string
+    {
+        if ($this->imagen === null) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->imagen);
     }
 }
