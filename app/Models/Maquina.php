@@ -29,4 +29,9 @@ class Maquina extends Model
     {
         return $this->belongsTo(Gimnasio::class);
     }
+
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class);
+    }
 }

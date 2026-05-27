@@ -6,6 +6,7 @@ use App\Models\Maquina;
 use App\Models\Reserva;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ReservasController extends Controller
 {
@@ -31,7 +32,7 @@ class ReservasController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $datos = $this->validatedData($request);
+        $datos = $this->resolveValidatedData($request);
 
         $hayConflicto = Reserva::query()
             ->where('maquina_id', $datos['maquina_id'])
@@ -73,7 +74,7 @@ class ReservasController extends Controller
 
     public function update(Request $request, Reserva $reserva): JsonResponse
     {
-        $datos = $this->validatedData($request);
+        $datos = $this->resolveValidatedData($request);
 
         $hayConflicto = Reserva::query()
             ->where('maquina_id', $datos['maquina_id'])
@@ -143,13 +144,55 @@ class ReservasController extends Controller
 
     private function validatedData(Request $request): array
     {
+        $usuarioAutenticado = $request->user();
+        $reglasUsuarioId = $usuarioAutenticado !== null && $usuarioAutenticado->rol !== 'admin'
+            ? ['sometimes', 'nullable', 'integer']
+            : ['required', 'integer', 'exists:usuarios,id'];
+
         return $request->validate([
-            'usuario_id' => ['required', 'integer', 'exists:usuarios,id'],
+            'usuario_id' => $reglasUsuarioId,
             'maquina_id' => ['required', 'integer', 'exists:maquinas,id'],
-            'gimnasio_id' => ['required', 'integer', 'exists:gimnasios,id'],
+            'gimnasio_id' => ['sometimes', 'nullable', 'integer', 'exists:gimnasios,id'],
             'hora_inicio' => ['required', 'date'],
             'hora_fin' => ['required', 'date', 'after:hora_inicio'],
             'estado' => ['sometimes', 'string', 'in:activa,cancelada,completada'],
         ]);
+    }
+
+    private function resolveValidatedData(Request $request): array
+    {
+        $datos = $this->validatedData($request);
+        $maquina = Maquina::query()->findOrFail($datos['maquina_id']);
+        $usuarioAutenticado = $request->user();
+
+        if ($usuarioAutenticado !== null && $usuarioAutenticado->rol !== 'admin') {
+            if ($usuarioAutenticado->gimnasio_id === null) {
+                throw ValidationException::withMessages([
+                    'usuario_id' => 'Debes tener un gimnasio asignado para crear reservas.',
+                ]);
+            }
+
+            if ((int) $usuarioAutenticado->gimnasio_id !== (int) $maquina->gimnasio_id) {
+                throw ValidationException::withMessages([
+                    'maquina_id' => 'Solo puedes reservar maquinas de tu propio gimnasio.',
+                ]);
+            }
+
+            $datos['usuario_id'] = $usuarioAutenticado->id;
+        }
+
+        if (
+            array_key_exists('gimnasio_id', $datos)
+            && $datos['gimnasio_id'] !== null
+            && (int) $datos['gimnasio_id'] !== (int) $maquina->gimnasio_id
+        ) {
+            throw ValidationException::withMessages([
+                'gimnasio_id' => 'La reserva debe pertenecer al mismo gimnasio que la maquina seleccionada.',
+            ]);
+        }
+
+        $datos['gimnasio_id'] = $maquina->gimnasio_id;
+
+        return $datos;
     }
 }

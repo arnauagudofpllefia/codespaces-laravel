@@ -24,4 +24,14 @@ class Gimnasio extends Model
     {
         return $this->hasMany(Usuario::class);
     }
+
+    public function maquinas()
+    {
+        return $this->hasMany(Maquina::class);
+    }
+
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class);
+    }
 }
