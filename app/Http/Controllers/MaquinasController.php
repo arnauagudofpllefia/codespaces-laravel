@@ -3,18 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Maquina;
-use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 
 class MaquinasController extends Controller
 {
-    public function __construct(private readonly FileUploadService $fileUploadService)
-    {
-    }
-
-
     public function index(): JsonResponse
     {
         $maquinas = Maquina::query()
@@ -94,37 +87,21 @@ class MaquinasController extends Controller
             'gimnasio_id' => ['required', 'integer', 'exists:gimnasios,id'],
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
-            'imagen' => ['sometimes', 'nullable', 'string', 'max:2048'],
-            'imagen_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
-            'image_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
-            'archivo' => ['sometimes', 'nullable', 'file', 'image', 'max:10240'],
-            'file' => ['sometimes', 'nullable', 'file', 'image', 'max:10240'],
-            'imagen_archivo' => ['sometimes', 'nullable', 'file', 'image', 'max:10240'],
+            'imagen' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'imagen_url' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'image_url' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'archivo' => ['prohibited'],
+            'file' => ['prohibited'],
+            'imagen_archivo' => ['prohibited'],
             'activa' => ['sometimes', 'boolean'],
         ]);
 
-        $uploadedFile = $this->extractImageFile($request);
-
-        if ($uploadedFile !== null) {
-            $upload = $this->fileUploadService->store($uploadedFile, 'machines');
-            $data['imagen'] = $upload['path'];
-        } elseif (! array_key_exists('imagen', $data)) {
+        if (! array_key_exists('imagen', $data)) {
             $data['imagen'] = $data['imagen_url'] ?? $data['image_url'] ?? null;
         }
 
-        unset($data['archivo'], $data['file'], $data['imagen_archivo'], $data['imagen_url'], $data['image_url']);
+        unset($data['imagen_url'], $data['image_url']);
 
         return $data;
-    }
-
-    private function extractImageFile(Request $request): ?UploadedFile
-    {
-        foreach (['archivo', 'file', 'imagen_archivo'] as $field) {
-            if ($request->hasFile($field)) {
-                return $request->file($field);
-            }
-        }
-
-        return null;
     }
 }

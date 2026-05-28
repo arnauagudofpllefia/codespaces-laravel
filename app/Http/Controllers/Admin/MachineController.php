@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Maquina;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class MachineController extends Controller
 {
@@ -24,11 +22,6 @@ class MachineController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $this->validateMachine($request, false);
-        $uploaded = $this->handleImageUpload($request);
-
-        if ($uploaded !== null) {
-            $data['imagen'] = $uploaded;
-        }
 
         $machine = Maquina::create($data);
 
@@ -38,12 +31,6 @@ class MachineController extends Controller
     public function update(Request $request, Maquina $maquina): JsonResponse
     {
         $data = $this->validateMachine($request, true);
-        $uploaded = $this->handleImageUpload($request);
-
-        if ($uploaded !== null) {
-            $this->deleteOldImage($maquina->imagen);
-            $data['imagen'] = $uploaded;
-        }
 
         $maquina->update($data);
 
@@ -52,7 +39,6 @@ class MachineController extends Controller
 
     public function destroy(Maquina $maquina): JsonResponse
     {
-        $this->deleteOldImage($maquina->imagen);
         $maquina->delete();
 
         return response()->json(['message' => 'ok']);
@@ -69,13 +55,19 @@ class MachineController extends Controller
             'descripcion' => ['sometimes', 'nullable', 'string', 'max:500'],
             'gimnasio_id' => [$requiredOrSometimes, 'integer', 'exists:gimnasios,id'],
             'activa' => ['sometimes', 'boolean'],
-            'imagen' => ['sometimes', 'nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
-            'archivo' => ['sometimes', 'nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
-            'file' => ['sometimes', 'nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
-            'imagen_archivo' => ['sometimes', 'nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
+            'imagen' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'imagen_url' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'image_url' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'archivo' => ['prohibited'],
+            'file' => ['prohibited'],
+            'imagen_archivo' => ['prohibited'],
         ]);
 
-        unset($data['imagen'], $data['archivo'], $data['file'], $data['imagen_archivo']);
+        if (! array_key_exists('imagen', $data)) {
+            $data['imagen'] = $data['imagen_url'] ?? $data['image_url'] ?? null;
+        }
+
+        unset($data['imagen_url'], $data['image_url']);
 
         if (array_key_exists('estado', $data) && ! array_key_exists('activa', $data)) {
             $estado = mb_strtolower((string) $data['estado']);
@@ -85,41 +77,10 @@ class MachineController extends Controller
         return $data;
     }
 
-    private function handleImageUpload(Request $request): ?string
-    {
-        $file = $this->extractImageFile($request);
-
-        if ($file === null) {
-            return null;
-        }
-
-        return $file->store('machines', 'public');
-    }
-
-    private function extractImageFile(Request $request): ?UploadedFile
-    {
-        foreach (['imagen', 'archivo', 'file', 'imagen_archivo'] as $field) {
-            if ($request->hasFile($field)) {
-                return $request->file($field);
-            }
-        }
-
-        return null;
-    }
-
-    private function deleteOldImage(?string $path): void
-    {
-        if (! $path) {
-            return;
-        }
-
-        Storage::disk('public')->delete($path);
-    }
-
     private function transform(Maquina $machine): array
     {
         $imagePath = $machine->imagen;
-        $imageUrl = $imagePath ? Storage::disk('public')->url($imagePath) : null;
+        $imageUrl = $imagePath;
 
         return [
             'id' => $machine->id,

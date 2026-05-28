@@ -8,7 +8,6 @@ use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\MaquinasController;
 use App\Http\Controllers\ReservasController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GimnasiosController;
 
 // Rutas públicas
@@ -51,7 +50,6 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/machines/{maquina}', [MachineController::class, 'update']);
         Route::post('/machines/{maquina}', [MachineController::class, 'update']);
         Route::delete('/machines/{maquina}', [MachineController::class, 'destroy']);
-        Route::post('/uploads', [FilesController::class, 'store']);
         Route::post('/gym', [AdminController::class, 'createGym']);
         Route::get('/gym', [AdminController::class, 'getGym']);
         Route::get('/gym/{id}', [AdminController::class, 'showGym']);

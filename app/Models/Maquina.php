@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Maquina extends Model
 {
@@ -43,10 +42,6 @@ class Maquina extends Model
 
     public function getImagenUrlAttribute(): ?string
     {
-        if ($this->imagen === null) {
-            return null;
-        }
-
-        return Storage::disk('public')->url($this->imagen);
+        return $this->imagen;
     }
 }
