@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\ReservasController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GimnasiosController;
+use App\Http\Controllers\MachineImagesController;
 
 // Rutas públicas
 Route::get('/health', function () {
@@ -19,6 +20,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/gyms', [GimnasiosController::class, 'index']);
 Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
+Route::get('/avatar-images', [MachineImagesController::class, 'index']);
+Route::get('/avatar-images/{filename}', [MachineImagesController::class, 'show'])
+    ->where('filename', '[A-Za-z0-9._-]+')
+    ->name('avatar-images.show');
 
 // Rutas protegidas con autenticación
 Route::middleware('auth:api')->group(function () {
