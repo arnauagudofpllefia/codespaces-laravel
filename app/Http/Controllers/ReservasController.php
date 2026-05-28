@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Maquina;
+use App\Models\Notificacion;
 use App\Models\Reserva;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,23 @@ class ReservasController extends Controller
         }
 
         $reserva = Reserva::create($datos);
+        $reserva->load(['maquina']);
+
+        Notificacion::create([
+            'user_id' => $reserva->usuario_id,
+            'type' => 'reservation_created',
+            'title' => 'Reserva creada',
+            'message' => 'Tu reserva para ' . ($reserva->maquina->nombre ?? 'la maquina seleccionada') . ' ha sido creada.',
+            'data' => [
+                'reservation_id' => $reserva->id,
+                'machine_id' => $reserva->maquina_id,
+                'gym_id' => $reserva->gimnasio_id,
+                'start_time' => optional($reserva->hora_inicio)->toIso8601String(),
+                'end_time' => optional($reserva->hora_fin)->toIso8601String(),
+            ],
+            'channel' => 'in_app',
+            'delivered_at' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Reserva creada correctamente.',
@@ -103,6 +121,24 @@ class ReservasController extends Controller
 
     public function destroy(Reserva $reserva): JsonResponse
     {
+        $reserva->loadMissing('maquina');
+
+        Notificacion::create([
+            'user_id' => $reserva->usuario_id,
+            'type' => 'reservation_cancelled',
+            'title' => 'Reserva cancelada',
+            'message' => 'Tu reserva para ' . ($reserva->maquina->nombre ?? 'la maquina seleccionada') . ' ha sido cancelada.',
+            'data' => [
+                'reservation_id' => $reserva->id,
+                'machine_id' => $reserva->maquina_id,
+                'gym_id' => $reserva->gimnasio_id,
+                'start_time' => optional($reserva->hora_inicio)->toIso8601String(),
+                'end_time' => optional($reserva->hora_fin)->toIso8601String(),
+            ],
+            'channel' => 'in_app',
+            'delivered_at' => now(),
+        ]);
+
         $reserva->delete();
 
         return response()->json([

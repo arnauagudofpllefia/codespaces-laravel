@@ -51,4 +51,9 @@ class Usuario extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Gimnasio::class);
     }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'user_id');
+    }
 }

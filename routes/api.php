@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MachineController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\MaquinasController;
+use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\ReservasController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GimnasiosController;
@@ -40,6 +41,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/reservations', [ReservasController::class, 'store']);
     Route::get('/reservations/my', [ReservasController::class, 'getMyReservations']);
     Route::delete('/reservations/{reserva}', [ReservasController::class, 'destroy']);
+
+    // Notificaciones - in_app
+    Route::get('/notifications', [NotificacionesController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificacionesController::class, 'unreadCount']);
+    Route::patch('/notifications/read-all', [NotificacionesController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{notificacion}/read', [NotificacionesController::class, 'markAsRead']);
 
     // Rutas de administrador
     Route::middleware('role:admin')->prefix('admin')->group(function () {
