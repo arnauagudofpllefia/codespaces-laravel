@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Gimnasio;
 use App\Models\Maquina;
+use App\Models\Reserva;
 use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -154,5 +155,54 @@ class ReservaGymAssociationTest extends TestCase
             ->assertJsonValidationErrors('maquina_id');
 
         $this->assertDatabaseCount('reservas', 0);
+    }
+
+    public function test_endpoint_de_reservas_de_maquina_incluye_hora_fin_y_end_time(): void
+    {
+        $gimnasio = Gimnasio::create([
+            'nombre' => 'Gym Centro 2',
+            'direccion' => 'Calle Dos 456',
+            'telefono' => '611222333',
+        ]);
+
+        $usuario = Usuario::create([
+            'nombre' => 'Pablo',
+            'email' => 'pablo@example.com',
+            'contrasena' => Hash::make('secret123'),
+            'rol' => 'usuario',
+            'gimnasio_id' => $gimnasio->id,
+            'gimnasio_cambiado_en' => now(),
+        ]);
+
+        $maquina = Maquina::create([
+            'gimnasio_id' => $gimnasio->id,
+            'nombre' => 'Eliptica 4',
+            'descripcion' => 'Maquina eliptica',
+            'activa' => true,
+        ]);
+
+        $inicio = now()->addHour()->seconds(0);
+        $fin = (clone $inicio)->addHour();
+
+        Reserva::create([
+            'usuario_id' => $usuario->id,
+            'maquina_id' => $maquina->id,
+            'gimnasio_id' => $gimnasio->id,
+            'hora_inicio' => $inicio,
+            'hora_fin' => $fin,
+            'estado' => 'activa',
+        ]);
+
+        $token = JWTAuth::fromUser($usuario);
+
+        $response = $this
+            ->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/machines/' . $maquina->id . '/reservations');
+
+        $response->assertOk()
+            ->assertJsonPath('maquina_id', $maquina->id)
+            ->assertJsonCount(1, 'reservas')
+            ->assertJsonPath('reservas.0.hora_fin', $fin->toIso8601String())
+            ->assertJsonPath('reservas.0.end_time', $fin->toIso8601String());
     }
 }

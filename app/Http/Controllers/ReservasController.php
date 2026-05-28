@@ -128,9 +128,12 @@ class ReservasController extends Controller
         $reservas = Reserva::query()
             ->where('maquina_id', $id)
             ->orderBy('hora_inicio')
-            ->get(['hora_inicio', 'estado'])
+            ->get(['hora_inicio', 'hora_fin', 'estado'])
             ->map(fn (Reserva $reserva) => [
                 'hora' => optional($reserva->hora_inicio)->toIso8601String(),
+                'hora_inicio' => optional($reserva->hora_inicio)->toIso8601String(),
+                'hora_fin' => optional($reserva->hora_fin)->toIso8601String(),
+                'end_time' => optional($reserva->hora_fin)->toIso8601String(),
                 'estado' => $reserva->estado,
                 'plazas' => 1,
             ])
