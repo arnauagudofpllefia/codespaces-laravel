@@ -6,6 +6,11 @@ cd /var/www/html
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache
 chmod -R ug+rwx storage bootstrap/cache || true
 
+# Ensure uploaded files in storage/app/public are reachable via /storage/*
+if [ ! -L public/storage ]; then
+    php artisan storage:link || true
+fi
+
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
     php artisan migrate --force
 fi
