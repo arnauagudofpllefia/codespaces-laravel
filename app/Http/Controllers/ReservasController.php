@@ -57,7 +57,7 @@ class ReservasController extends Controller
             'user_id' => $reserva->usuario_id,
             'type' => 'reservation_created',
             'title' => 'Reserva creada',
-            'message' => 'Tu reserva para ' . ($reserva->maquina->nombre ?? 'la maquina seleccionada') . ' ha sido creada.',
+            'message' => 'Reserva confirmada para ' . ($reserva->maquina->nombre ?? 'la máquina') . ' el ' . ($reserva->hora_inicio?->format('d/m/Y H:i') ?? ''),
             'data' => [
                 'reservation_id' => $reserva->id,
                 'machine_id' => $reserva->maquina_id,
@@ -127,7 +127,7 @@ class ReservasController extends Controller
             'user_id' => $reserva->usuario_id,
             'type' => 'reservation_cancelled',
             'title' => 'Reserva cancelada',
-            'message' => 'Tu reserva para ' . ($reserva->maquina->nombre ?? 'la maquina seleccionada') . ' ha sido cancelada.',
+            'message' => 'Reserva cancelada para ' . ($reserva->maquina->nombre ?? 'la máquina') . ' que estaba programada para ' . ($reserva->hora_inicio?->format('d/m/Y H:i') ?? ''),
             'data' => [
                 'reservation_id' => $reserva->id,
                 'machine_id' => $reserva->maquina_id,
