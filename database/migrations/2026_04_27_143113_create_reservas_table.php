@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Agenda de reservas entre usuarios y máquinas.
         Schema::create('reservas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuario_id')->constrained('usuarios');
             $table->foreignId('maquina_id')->constrained('maquinas');
             $table->foreignId('gimnasio_id')->constrained('gimnasios');
+            // Intervalo reservado para detectar solapamientos en lógica de negocio.
             $table->dateTime('hora_inicio');
             $table->dateTime('hora_fin');
             $table->enum('estado', ['activa', 'cancelada', 'completada'])->default('activa');

@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Tabla base de autenticación y autorización (rol) de la API.
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('contrasena');
             $table->enum('rol', ['admin', 'usuario'])->default('usuario');
+            // Se usan nombres personalizados para timestamps por convención del proyecto.
             $table->timestamp('creado_en')->useCurrent();
             $table->timestamp('actualizado_en')->useCurrent()->useCurrentOnUpdate();
         });

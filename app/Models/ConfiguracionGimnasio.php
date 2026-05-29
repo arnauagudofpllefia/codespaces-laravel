@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Parámetros operativos del gimnasio para la lógica de agenda.
+ */
 class ConfiguracionGimnasio extends Model
 {
     use HasFactory;
@@ -20,6 +23,7 @@ class ConfiguracionGimnasio extends Model
         'hora_cierre',
     ];
 
+    // Configuración pertenece a un gimnasio concreto.
     public function gimnasio()
     {
         return $this->belongsTo(Gimnasio::class);

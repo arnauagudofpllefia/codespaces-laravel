@@ -8,9 +8,14 @@ use App\Models\Usuario;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-
+/**
+ * Controla el ciclo de autenticación JWT: registro, login y logout.
+ */
 class AuthController extends Controller
 {
+    /**
+     * Crea un usuario nuevo y devuelve un token JWT listo para usar.
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -25,6 +30,7 @@ class AuthController extends Controller
         }
 
         try {
+            // Se almacena la contraseña hasheada, nunca en texto plano.
             $usuario = Usuario::create([
                 'nombre' => $request->nombre,
                 'email' => $request->email,
@@ -34,6 +40,7 @@ class AuthController extends Controller
                 'gimnasio_cambiado_en' => $request->gimnasio_id ? now() : null,
             ]);
 
+            // Se emite el JWT inmediatamente para evitar un segundo login tras registrarse.
             $token = JWTAuth::fromUser($usuario);
 
             return response()->json([
@@ -46,6 +53,9 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Valida credenciales y entrega un JWT para las rutas protegidas.
+     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -63,6 +73,7 @@ class AuthController extends Controller
         ];
 
         try {
+            // JWTAuth::attempt retorna false cuando email/contraseña no coinciden.
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Credenciales inválidas.'], 400);
             }
@@ -76,6 +87,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Invalida el token actual para cerrar la sesión del cliente.
+     */
     public function logout(Request $request)
     {
         try {

@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Configuración horaria para calcular disponibilidad por gimnasio.
         Schema::create('configuracion_gimnasio', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gimnasio_id')->constrained('gimnasios');

@@ -9,6 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('maquinas', function (Blueprint $table) {
+            // URL pública de imagen de la máquina (sin almacenamiento binario en DB).
             $table->string('imagen', 2048)->nullable()->after('descripcion');
         });
     }

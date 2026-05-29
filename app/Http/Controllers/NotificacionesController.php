@@ -6,8 +6,14 @@ use App\Models\Notificacion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Administra la bandeja de notificaciones in-app del usuario autenticado.
+ */
 class NotificacionesController extends Controller
 {
+    /**
+     * Lista notificaciones activas (no expiradas), con opción de filtrar no leídas.
+     */
     public function index(Request $request): JsonResponse
     {
         $datos = $request->validate([
@@ -15,6 +21,7 @@ class NotificacionesController extends Controller
             'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
+        // Priorizamos no leídas arriba para mejorar la UX del inbox.
         $query = Notificacion::query()
             ->where('user_id', $request->user()->id)
             ->where(function ($q) {
@@ -47,6 +54,9 @@ class NotificacionesController extends Controller
         ]);
     }
 
+    /**
+     * Devuelve únicamente el contador de no leídas para badges del frontend.
+     */
     public function unreadCount(Request $request): JsonResponse
     {
         $unreadCount = Notificacion::query()
@@ -63,6 +73,9 @@ class NotificacionesController extends Controller
         ]);
     }
 
+    /**
+     * Marca una notificación como leída verificando propiedad del recurso.
+     */
     public function markAsRead(Request $request, Notificacion $notificacion): JsonResponse
     {
         if ((int) $notificacion->user_id !== (int) $request->user()->id) {
@@ -83,6 +96,9 @@ class NotificacionesController extends Controller
         ]);
     }
 
+    /**
+     * Marca como leídas todas las notificaciones pendientes del usuario.
+     */
     public function markAllAsRead(Request $request): JsonResponse
     {
         $updated = Notificacion::query()

@@ -8,8 +8,14 @@ use App\Models\Gimnasio;
 use App\Models\Usuario;
 use App\Models\Reserva;
 
+/**
+ * Endpoints exclusivos de administración para gestión global del sistema.
+ */
 class AdminController extends Controller
 {
+    /**
+     * Endpoint de resumen para panel admin (placeholder de dashboard).
+     */
     public function dashboard(): JsonResponse
     {
         return response()->json([
@@ -17,6 +23,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Crea un gimnasio nuevo.
+     */
     public function createGym(Request $request): JsonResponse
     {
         $gimnasio = Gimnasio::create($request->validate([
@@ -31,6 +40,9 @@ class AdminController extends Controller
         ], 201);
     }
 
+    /**
+     * Lista todos los gimnasios.
+     */
     public function getGym(): JsonResponse
     {
         $gimnasios = Gimnasio::query()->orderBy('id')->get();
@@ -41,6 +53,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Muestra un gimnasio concreto por id.
+     */
     public function showGym(int $id): JsonResponse
     {
         $gimnasio = Gimnasio::query()->findOrFail($id);
@@ -51,6 +66,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Elimina un gimnasio.
+     */
     public function destroyGym(int $id): JsonResponse
     {
         $gimnasio = Gimnasio::query()->findOrFail($id);
@@ -61,6 +79,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Actualiza un gimnasio existente.
+     */
     public function updateGym(Request $request, int $id): JsonResponse
     {
         $gimnasio = Gimnasio::query()->findOrFail($id);
@@ -79,12 +100,18 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Lista usuarios con relación de gimnasio (uso de administración).
+     */
     public function getUsers(): JsonResponse
     {
         $usuarios = Usuario::query()->with('gimnasio')->orderBy('id')->get();
         return response()->json($usuarios);
     }
 
+    /**
+     * Cambia el rol de un usuario.
+     */
     public function updateUserRole(Request $request, $id): JsonResponse
     {
         $usuario = Usuario::findOrFail($id);
@@ -101,6 +128,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Reasigna el gimnasio de un usuario y registra fecha de cambio.
+     */
     public function updateUserGym(Request $request, int $id): JsonResponse
     {
         $usuario = Usuario::query()->findOrFail($id);
@@ -121,6 +151,9 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Lista completa de reservas para vista administrativa.
+     */
     public function getReservations(): JsonResponse
     {
         $reservas = Reserva::query()

@@ -6,8 +6,14 @@ use App\Models\Maquina;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Endpoints de consulta y gestión básica de máquinas.
+ */
 class MaquinasController extends Controller
 {
+    /**
+     * Lista máquinas con su gimnasio asociado.
+     */
     public function index(): JsonResponse
     {
         $maquinas = Maquina::query()
@@ -19,6 +25,9 @@ class MaquinasController extends Controller
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function create(): JsonResponse
     {
         return response()->json([
@@ -27,6 +36,9 @@ class MaquinasController extends Controller
     }
 
 
+    /**
+     * Crea una máquina validando datos y normalizando el campo de imagen.
+     */
     public function store(Request $request): JsonResponse
     {
         $maquina = Maquina::create($this->validatedData($request));
@@ -38,12 +50,18 @@ class MaquinasController extends Controller
     }
 
 
+    /**
+     * Muestra una máquina concreta por route-model binding.
+     */
     public function show(Maquina $maquina): JsonResponse
     {
         return response()->json($maquina->load('gimnasio'));
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function edit(Maquina $maquina): JsonResponse
     {
         return response()->json([
@@ -52,6 +70,9 @@ class MaquinasController extends Controller
     }
 
 
+    /**
+     * Actualiza una máquina y devuelve su estado final con relaciones.
+     */
     public function update(Request $request, Maquina $maquina): JsonResponse
     {
         $maquina->update($this->validatedData($request));
@@ -63,6 +84,9 @@ class MaquinasController extends Controller
     }
 
 
+    /**
+     * Elimina una máquina.
+     */
     public function destroy(Maquina $maquina): JsonResponse
     {
         $maquina->delete();
@@ -72,6 +96,9 @@ class MaquinasController extends Controller
         ]);
     }
 
+    /**
+     * Punto de extensión para disponibilidad por slots (actualmente vacío).
+     */
     public function getSlots(Maquina $maquina): JsonResponse
     {
 
@@ -81,6 +108,9 @@ class MaquinasController extends Controller
         ]);
     }
 
+    /**
+     * Valida payload y consolida aliases de imagen en el campo canonical `imagen`.
+     */
     private function validatedData(Request $request): array
     {
         $data = $request->validate([
@@ -96,6 +126,7 @@ class MaquinasController extends Controller
             'activa' => ['sometimes', 'boolean'],
         ]);
 
+        // Se aceptan imagen_url/image_url por compatibilidad, pero se guarda siempre como `imagen`.
         if (! array_key_exists('imagen', $data)) {
             $data['imagen'] = $data['imagen_url'] ?? $data['image_url'] ?? null;
         }

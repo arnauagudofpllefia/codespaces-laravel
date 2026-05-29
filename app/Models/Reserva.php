@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Reserva de una máquina en un rango horario específico.
+ */
 class Reserva extends Model
 {
     use HasFactory;
@@ -28,16 +31,19 @@ class Reserva extends Model
         'hora_fin' => 'datetime',
     ];
 
+    // Usuario que realiza la reserva.
     public function usuario()
     {
         return $this->belongsTo(Usuario::class);
     }
 
+    // Máquina reservada.
     public function maquina()
     {
         return $this->belongsTo(Maquina::class);
     }
 
+    // Gimnasio donde ocurre la reserva.
     public function gimnasio()
     {
         return $this->belongsTo(Gimnasio::class);

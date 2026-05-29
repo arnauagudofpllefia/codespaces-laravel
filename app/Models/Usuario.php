@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * Modelo de usuario autenticable de la API.
+ *
+ * Usa JWT como mecanismo de autenticación y mantiene la relación
+ * con gimnasio para reglas de negocio (reservas y cambio de centro).
+ */
 class Usuario extends Authenticatable implements JWTSubject
 {
     use HasFactory;
@@ -32,26 +38,31 @@ class Usuario extends Authenticatable implements JWTSubject
         'contrasena',
     ];
 
+    // Informa a Laravel qué campo usar como password al autenticar.
     public function getAuthPassword(): string
     {
         return $this->contrasena;
     }
 
+    // Claim "sub" del token JWT.
     public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
+    // Claims personalizados adicionales (actualmente ninguno).
     public function getJWTCustomClaims(): array
     {
         return [];
     }
 
+    // Gimnasio al que pertenece el usuario.
     public function gimnasio()
     {
         return $this->belongsTo(Gimnasio::class);
     }
 
+    // Notificaciones in-app asociadas al usuario.
     public function notificaciones()
     {
         return $this->hasMany(Notificacion::class, 'user_id');

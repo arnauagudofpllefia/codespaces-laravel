@@ -6,9 +6,15 @@ use App\Models\Gimnasio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * CRUD básico de gimnasios.
+ */
 class GimnasiosController extends Controller
 {
 
+    /**
+     * Lista gimnasios ordenados por id.
+     */
     public function index(): JsonResponse
     {
         $gimnasios = Gimnasio::query()->orderBy('id')->get();
@@ -17,6 +23,9 @@ class GimnasiosController extends Controller
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function create(): JsonResponse
     {
         return response()->json([
@@ -25,6 +34,9 @@ class GimnasiosController extends Controller
     }
 
 
+    /**
+     * Crea un gimnasio.
+     */
     public function store(Request $request): JsonResponse
     {
         $gimnasio = Gimnasio::create($this->validatedData($request));
@@ -36,12 +48,18 @@ class GimnasiosController extends Controller
     }
 
 
+    /**
+     * Devuelve un gimnasio por route-model binding.
+     */
     public function show(Gimnasio $gimnasio): JsonResponse
     {
         return response()->json($gimnasio);
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function edit(Gimnasio $gimnasio): JsonResponse
     {
         return response()->json([
@@ -50,6 +68,9 @@ class GimnasiosController extends Controller
     }
 
 
+    /**
+     * Actualiza un gimnasio existente.
+     */
     public function update(Request $request, Gimnasio $gimnasio): JsonResponse
     {
         $gimnasio->update($this->validatedData($request));
@@ -60,7 +81,9 @@ class GimnasiosController extends Controller
         ]);
     }
 
-    
+    /**
+     * Elimina un gimnasio.
+     */
     public function destroy(Gimnasio $gimnasio): JsonResponse
     {
         $gimnasio->delete();
@@ -70,6 +93,9 @@ class GimnasiosController extends Controller
         ]);
     }
 
+    /**
+     * Reglas de validación compartidas entre creación y actualización.
+     */
     private function validatedData(Request $request): array
     {
         return $request->validate([

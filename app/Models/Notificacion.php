@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Notificación in-app enviada a un usuario (creación/cancelación de reserva, etc.).
+ */
 class Notificacion extends Model
 {
     use HasFactory;
@@ -30,6 +33,7 @@ class Notificacion extends Model
         'expires_at' => 'datetime',
     ];
 
+    // Usuario propietario de la notificación.
     public function usuario()
     {
         return $this->belongsTo(Usuario::class, 'user_id');

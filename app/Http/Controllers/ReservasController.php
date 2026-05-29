@@ -9,9 +9,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Gestiona reservas de máquinas con validaciones de solapamiento y reglas por rol.
+ */
 class ReservasController extends Controller
 {
 
+    /**
+     * Lista global de reservas (uso administrativo).
+     */
     public function index(): JsonResponse
     {
         $reservas = Reserva::query()
@@ -23,6 +29,9 @@ class ReservasController extends Controller
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function create(): JsonResponse
     {
         return response()->json([
@@ -31,10 +40,14 @@ class ReservasController extends Controller
     }
 
 
+    /**
+     * Crea una reserva y notifica al usuario cuando se confirma.
+     */
     public function store(Request $request): JsonResponse
     {
         $datos = $this->resolveValidatedData($request);
 
+        // Evita reservas activas solapadas para la misma máquina en el mismo tramo horario.
         $hayConflicto = Reserva::query()
             ->where('maquina_id', $datos['maquina_id'])
             ->where('estado', 'activa')
@@ -53,6 +66,7 @@ class ReservasController extends Controller
         $reserva = Reserva::create($datos);
         $reserva->load(['maquina']);
 
+        // Notificación in-app para reflejar la creación en la bandeja del usuario.
         Notificacion::create([
             'user_id' => $reserva->usuario_id,
             'type' => 'reservation_created',
@@ -76,12 +90,18 @@ class ReservasController extends Controller
     }
 
 
+    /**
+     * Devuelve el detalle de una reserva con sus relaciones principales.
+     */
     public function show(Reserva $reserva): JsonResponse
     {
         return response()->json($reserva->load(['usuario', 'maquina', 'gimnasio']));
     }
 
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function edit(Reserva $reserva): JsonResponse
     {
         return response()->json([
@@ -90,10 +110,14 @@ class ReservasController extends Controller
     }
 
 
+    /**
+     * Actualiza una reserva manteniendo las mismas reglas de conflicto que en creación.
+     */
     public function update(Request $request, Reserva $reserva): JsonResponse
     {
         $datos = $this->resolveValidatedData($request);
 
+        // Ignora la propia reserva al comprobar colisiones horarias.
         $hayConflicto = Reserva::query()
             ->where('maquina_id', $datos['maquina_id'])
             ->where('estado', 'activa')
@@ -119,10 +143,14 @@ class ReservasController extends Controller
     }
 
 
+    /**
+     * Elimina una reserva y deja trazabilidad mediante notificación al usuario.
+     */
     public function destroy(Reserva $reserva): JsonResponse
     {
         $reserva->loadMissing('maquina');
 
+        // Notificación de cancelación para que el usuario vea el cambio de estado.
         Notificacion::create([
             'user_id' => $reserva->usuario_id,
             'type' => 'reservation_cancelled',
@@ -146,6 +174,9 @@ class ReservasController extends Controller
         ]);
     }
 
+    /**
+     * Devuelve solo las reservas del usuario autenticado.
+     */
     public function getMyReservations(Request $request): JsonResponse
     {
         $reservas = Reserva::query()
@@ -157,6 +188,9 @@ class ReservasController extends Controller
         return response()->json($reservas);
     }
 
+    /**
+     * Lista intervalos ya reservados de una máquina para construir calendarios en frontend.
+     */
     public function getMachineReservations(int $id): JsonResponse
     {
         Maquina::query()->findOrFail($id);
@@ -181,6 +215,9 @@ class ReservasController extends Controller
         ]);
     }
 
+    /**
+     * Valida estructura/base del payload; reglas finas se aplican en resolveValidatedData.
+     */
     private function validatedData(Request $request): array
     {
         $usuarioAutenticado = $request->user();
@@ -198,6 +235,12 @@ class ReservasController extends Controller
         ]);
     }
 
+    /**
+     * Aplica reglas de negocio:
+     * - Usuarios normales solo reservan para sí mismos.
+     * - Solo pueden reservar máquinas de su gimnasio.
+     * - El gimnasio final siempre se toma de la máquina seleccionada.
+     */
     private function resolveValidatedData(Request $request): array
     {
         $datos = $this->validatedData($request);

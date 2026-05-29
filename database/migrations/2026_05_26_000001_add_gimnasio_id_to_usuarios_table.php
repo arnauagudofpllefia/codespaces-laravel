@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('usuarios', function (Blueprint $table) {
+            // Asignación opcional de gimnasio al usuario.
             $table->foreignId('gimnasio_id')
                 ->nullable()
                 ->after('rol')

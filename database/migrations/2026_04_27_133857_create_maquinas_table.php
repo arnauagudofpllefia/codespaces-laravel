@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Inventario de máquinas por gimnasio.
         Schema::create('maquinas', function (Blueprint $table) {
             $table->id();
+            // Relación obligatoria: cada máquina pertenece a un gimnasio.
             $table->foreignId('gimnasio_id')->constrained('gimnasios');
             $table->string('nombre');
             $table->text('descripcion')->nullable();

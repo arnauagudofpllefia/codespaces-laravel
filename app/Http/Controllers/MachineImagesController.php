@@ -7,6 +7,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Publica avatares almacenados en storage/public/avatars para consumo del frontend.
+ */
 class MachineImagesController extends Controller
 {
     /**
@@ -37,6 +40,7 @@ class MachineImagesController extends Controller
      */
     public function show(string $filename): StreamedResponse|Response
     {
+        // Sanitiza el nombre para evitar path traversal.
         if (! preg_match('/^[A-Za-z0-9._-]+$/', $filename)) {
             abort(404);
         }
@@ -54,6 +58,7 @@ class MachineImagesController extends Controller
             'Cache-Control' => 'public, max-age=86400',
         ];
 
+        // Stream para no cargar el archivo completo en memoria.
         return response()->stream(function () use ($disk, $path): void {
             $stream = $disk->readStream($path);
 

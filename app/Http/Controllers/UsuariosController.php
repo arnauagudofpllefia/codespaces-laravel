@@ -7,8 +7,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * CRUD de usuarios y edición del perfil del usuario autenticado.
+ */
 class UsuariosController extends Controller
 {
+    /**
+     * Lista usuarios con su gimnasio (uso administrativo).
+     */
     public function index(): JsonResponse
     {
         $usuarios = Usuario::query()
@@ -19,6 +25,9 @@ class UsuariosController extends Controller
         return response()->json($usuarios);
     }
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function create(): JsonResponse
     {
         return response()->json([
@@ -26,10 +35,15 @@ class UsuariosController extends Controller
         ], 405);
     }
 
+    /**
+     * Crea un usuario y almacena la contraseña en hash.
+     */
     public function store(Request $request): JsonResponse
     {
         $data = $this->validatedData($request);
         $data['contrasena'] = Hash::make($data['contrasena']);
+
+        // Si nace con gimnasio asignado, se registra la fecha para aplicar la regla de 2 semanas.
         if (array_key_exists('gimnasio_id', $data) && $data['gimnasio_id'] !== null) {
             $data['gimnasio_cambiado_en'] = now();
         }
@@ -41,11 +55,17 @@ class UsuariosController extends Controller
         ], 201);
     }
 
+    /**
+     * Muestra un usuario individual.
+     */
     public function show(Usuario $usuario): JsonResponse
     {
         return response()->json($usuario->load('gimnasio'));
     }
 
+    /**
+     * Endpoint no utilizado en API REST (se mantiene por compatibilidad de resource).
+     */
     public function edit(Usuario $usuario): JsonResponse
     {
         return response()->json([
@@ -53,6 +73,9 @@ class UsuariosController extends Controller
         ], 405);
     }
 
+    /**
+     * Actualiza un usuario (flujo administrativo).
+     */
     public function update(Request $request, Usuario $usuario): JsonResponse
     {
         $data = $this->validatedDataUpdate($request, $usuario);
@@ -74,6 +97,9 @@ class UsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Elimina un usuario.
+     */
     public function destroy(Usuario $usuario): JsonResponse
     {
         $usuario->delete();
@@ -83,6 +109,9 @@ class UsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Actualiza el perfil propio y limita cambio de gimnasio a una vez cada 2 semanas.
+     */
     public function updateAuthenticatedUser(Request $request): JsonResponse
     {
         /** @var Usuario $usuario */
@@ -93,6 +122,7 @@ class UsuariosController extends Controller
         $gymRequested = array_key_exists('gimnasio_id', $data);
         $gymChanged = $gymRequested && ((int) $usuario->gimnasio_id !== (int) $data['gimnasio_id']);
 
+        // Regla de negocio: el usuario no puede cambiar de gimnasio antes de 14 días.
         if ($gymChanged && $usuario->gimnasio_cambiado_en !== null) {
             $nextAllowedChangeAt = $usuario->gimnasio_cambiado_en->copy()->addWeeks(2);
 
@@ -120,6 +150,9 @@ class UsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Validación de creación (campos obligatorios).
+     */
     private function validatedData(Request $request): array
     {
         return $request->validate([
@@ -131,6 +164,9 @@ class UsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Validación de actualización administrativa (campos opcionales).
+     */
     private function validatedDataUpdate(Request $request, Usuario $usuario): array
     {
         return $request->validate([
@@ -142,6 +178,9 @@ class UsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Validación de autoedición: no permite cambiar rol desde el propio perfil.
+     */
     private function validatedDataSelfUpdate(Request $request, Usuario $usuario): array
     {
         return $request->validate([

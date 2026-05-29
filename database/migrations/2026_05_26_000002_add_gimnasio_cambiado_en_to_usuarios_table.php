@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('usuarios', function (Blueprint $table) {
+            // Guarda la última fecha de cambio de gimnasio para aplicar cooldown de 2 semanas.
             $table->timestamp('gimnasio_cambiado_en')
                 ->nullable()
                 ->after('gimnasio_id');
